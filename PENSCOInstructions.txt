@@ -1,0 +1,52 @@
+Installation
+
+	Prerequisites:
+		install git
+		install angular 
+		install node
+		install mongo
+		create a local mongo library called PENSCO_lib
+		run mongodb
+	Node
+		1. clone repository
+		2. npm install
+			404 Not Found: event-stream@https://registry.npmjs.org/event-stream/-/event-stream-3.3.6.tgz
+			if above error, remove package-lock and re-install.
+		3. run gulp
+
+	Angular:
+		1. Clone repository
+		2. npm install
+		3. ng serve -o 
+			opens on http://localhost:4202/
+
+----------------------------------------------------------------------------------
+
+Assumed out of scope (overall): 
+		Security and certificates. 
+		Roles. 
+		Persistent logging. 
+		Any applicable SEC regulations.
+		"Extensive" testing
+
+	UI:
+		In scope: 
+			Page to add a stock purchase using a stock ticker symbol and a purchase amount.
+			Asyncronously submit data to API to create purchase
+			Visual feedback on success or error.
+		Assumed out of scope:
+			Animations, Styling, ADA compliance :)
+		Included:
+			List of purchases.
+			Full CRUD opperations.
+			Datetime of purchase.
+			UserId of purchaser. (may or may not be the person performing the purchase).
+	Server:
+		In Scope:
+			Create a stock purchase.
+			Retrieve a purchase based on unique identifier.
+			Retrieve a List of all purchases.
+			Retrieve a list of all purchases for a particular stock ticker id. (assumed all users).
+		Assumed out of scope:
+			Validation of userid, Limiting of purchase amount.
+
