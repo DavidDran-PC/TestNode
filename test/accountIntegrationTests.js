@@ -38,10 +38,10 @@ describe('Account Test', function(){
         .send(accountPost)
         .expect(200)
         .end(function(err, results){
-            results.status.should.equal(200);
+            results.status.should.equal(201);
             results.body.should.have.property('_id');
             results.body.should.have.property('purchaseAmount');
-            results.body.purchaseAmount.should.equal('200');
+            results.body.purchaseAmount.should.equal(200);
             done();
         });
 

@@ -1,8 +1,15 @@
 var accountController = function (Account) {
+    var https = require("https");
+    var iextradingUrl = 'https://api.iextrading.com/1.0';
 
+    //---------------------------------------------------------
+    // POST
+    //---------------------------------------------------------
     var post = function (req, res) {
-        console.log("in post");
+        console.log("in post ");
+        
         var account = new Account(req.body);
+        console.log("in post " + account.stockId);
         var str = validateIt(req)
         if (str) {
             res.status(400);
@@ -11,12 +18,8 @@ var accountController = function (Account) {
         else {
             if (global.mongooseup){
                 account.datetime=(new Date()).toJSON().slice(0, 19);
-                account.save().catch((err) => {
-                    res.status(500);
-                    res.jsonp("error saving");
-                });
-                res.status(201);
-                res.jsonp(account);
+                getPrice(account, res);
+                
             }
             else {
                 res.status(500).jsonp(JSON.stringify("mongoose is down"));
@@ -24,6 +27,9 @@ var accountController = function (Account) {
         }
     };
 
+    //---------------------------------------------------------
+    // GET
+    //---------------------------------------------------------
     var get = function (req, res) {
         console.log("in get query="+ JSON.stringify(req.query) + "  " + Object.keys(req.query).length + " " + req.query.stockId);
         if (Object.keys(req.query).length==0 ||(Object.keys(req.query).length == 1 && req.query.stockId) ){
@@ -44,6 +50,10 @@ var accountController = function (Account) {
             res.status(500).jsonp(JSON.stringify("Invalid Search"));
         }
     };
+
+    //---------------------------------------------------------
+    // Use
+    //---------------------------------------------------------
     use = function (req, res, next) {
         console.log("in use");
         if (global.mongooseup){
@@ -65,10 +75,17 @@ var accountController = function (Account) {
         }
     };
 
+    //---------------------------------------------------------
+    // getone
+    //---------------------------------------------------------
     var getone = function (req, res) {
         res.jsonp(req.account);
     };
 
+    //---------------------------------------------------------
+    // PUT  Normally on a transaction we wouldnt want changes or deletes allowed on the front end
+    //      like this unless this was a super user. I just wanted to show it.
+    //---------------------------------------------------------
     var put = function (req, res) {
         console.log("in put");
         var str = validateIt(req)
@@ -81,15 +98,7 @@ var accountController = function (Account) {
                 req.account.stockId = req.body.stockId;
                 req.account.purchaseAmount = req.body.purchaseAmount;
                 req.account.datetime=(new Date()).toJSON().slice(0, 19);
-                req.account.save(function (err) {
-                    if (err) {
-                        console.log("err");
-                        res.status(500).jsonp(JSON.stringify(err));
-                    }
-                    else {
-                        res.jsonp(req.account);
-                    }
-                });
+                getPrice(req.account, res);
             }
             else {
                 res.status(500).jsonp(JSON.stringify("mongoose is down"));
@@ -97,12 +106,16 @@ var accountController = function (Account) {
         }        
     };
 
+    //---------------------------------------------------------
+    // PATCH
+    //---------------------------------------------------------
     var patch = function (req, res) {
         deleteit
         if (req.body._id) {
             delete req.body._id;
         }
         for (var p in req.body) {
+            console.log("req.body[p]=" + JSON.stringify(req.body[p]));
             req.account[p] = req.body[p];
             req.account.datetime=(new Date()).toJSON().slice(0, 19);
         }
@@ -117,6 +130,9 @@ var accountController = function (Account) {
         });
     };
 
+    //---------------------------------------------------------
+    // DELETE
+    //---------------------------------------------------------
     var deleteit = function (req, res) {
         console.log("in deleteit");
         req.account.remove(function (err) {
@@ -130,6 +146,9 @@ var accountController = function (Account) {
         });
     };
 
+    //---------------------------------------------------------
+    // returns
+    //---------------------------------------------------------
     return {
         post: post,
         get: get,
@@ -140,6 +159,9 @@ var accountController = function (Account) {
         deleteit: deleteit
     };
 
+    //---------------------------------------------------------
+    // Functions
+    //---------------------------------------------------------
     function validateIt(req) {
         var str = "";
         if (!req.body.userId || req.body.userId === "") {
@@ -153,17 +175,48 @@ var accountController = function (Account) {
                 str = JSON.stringify('Stock Id must be no more than 6 chars upper case ');
             }
         }
-        if (!req.body.purchaseAmount || req.body.purchaseAmount === "") {
-            str = str + JSON.stringify('Purchase Amount is required');
+        if (typeof req.body.purchaseAmount ==='undefined' || req.body.purchaseAmount <= 0) {
+            console.log("in validateIt purchase amount= "+req.body.purchaseAmount);
+            str = str + JSON.stringify('Purchase Amount is required and cannot be less than or equal to zero');
         }
         else {
-            if (!/\d.\d/.test(req.body.purchaseAmount))
+            console.log(req.body.purchaseAmount);
+            if (!/\d/.test(req.body.purchaseAmount))
             {
                 str = JSON.stringify('Purchase Amount must be numeric ');
             }
         }
         return str;
     }
+    
+    function getPrice(account, resp, msg){
+        console.log("in getPrice account.stockid="+ account.stockId);
+         var fullurl = iextradingUrl +'/stock/'+account.stockId+'/price';
+        https.get(fullurl, function(res,error){
+            var body = "";
+            res.on('data', function(data) {
+              body += data;
+            });
+            res.on('end', function() {
+                account.price = body;
+                account.shares = Math.round((account.purchaseAmount/body)*1000.0) /1000.0;
+                account.save().catch((err) => {
+                    resp.status(500);
+                    resp.jsonp("error saving");
+                });
+                resp.status(201);
+                resp.jsonp(account);
+              console.log(body);
+              //console.log(JSON.stringify(account));
+            });
+            res.on('error', function(e) {
+              console.log(e.message);
+              resp.status(500);
+              resp.jsonp(e.message);
+            });
+        })
+    }
 };
+
 
 module.exports = accountController;
