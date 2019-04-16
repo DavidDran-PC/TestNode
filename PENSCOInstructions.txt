@@ -20,6 +20,85 @@ Installation
 		3. ng serve -o 
 			opens on http://localhost:4202/
 
+	
+	API Operations:
+		GET /accounts/ 
+			Gets all stock purchases
+				return JSON array of {
+						_Id,  << String Unique Mongoose ID
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+		GET /accounts/?stockId=<stock id> << Stock Ticker ID  
+			Gets all stock purchases that contain a stockId equal to the input stockId
+				return JSON array of {
+						_Id,  << String Unique Mongoose ID
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+		GET /accounts/<_Id> << Unique Mongoose ID 
+			Gets a single stock purchase
+				return JSON of {
+						_Id,  << String Unique Mongoose ID
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+		POST /accounts/
+			Posts (creates) a single stock purchase
+				input JSON of {
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+				return JSON of {
+						_Id,  << String Unique Mongoose ID (new ID)
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+		PUT /accounts/<_Id> << Unique Mongoose ID 
+			Puts (changes) a single stock purchase
+				input JSON of {
+						_Id,  << String Unique Mongoose ID optional (ignored)
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+				return JSON of {
+						_Id,  << String Unique Mongoose ID (from query string)
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+		PATCH /accounts
+			PATCH (changes an individul field of) a single stock purchase
+				input JSON of {
+						_Id,  << String Unique Mongoose ID (ignored)
+						userID,	<< String UserId (optional)
+						stockId, << String stock id (ticker number) (optional)
+						purchaseAmount << String purchase amount in USD. (optional)
+						datetime << String date time of purchase. (optional)
+					}
+				return JSON of {
+						_Id,  << String Unique Mongoose ID
+						userID,	<< String UserId
+						stockId, << String stock id (ticker number)
+						purchaseAmount << String purchase amount in USD.
+						datetime << String date time of purchase.
+					}
+		DELETE /accounts
+			deletes a single stock purchase
+				return JSON of "{\"message\":\"deleted it\"}"
 ----------------------------------------------------------------------------------
 
 Assumed out of scope (overall): 
