@@ -1,10 +1,14 @@
 var should = require('should'),
     sinon = require('sinon');
 
-describe('PENSCO Tests:', function(){
-    describe('Post', function(){
-        it('should not allow an empty title on post', function(){
-            var Account = function(account){this.save= function(){}};
+describe('PENSCO Tests:', function () {
+    describe('Post', function () {
+
+    //---------------------------------------------------------
+    // POST Test
+    //---------------------------------------------------------
+        it('should not allow an empty title on post', function () {
+            var Account = function (account) { this.save = function () { } };
 
             var req = {
                 body: {
@@ -21,7 +25,7 @@ describe('PENSCO Tests:', function(){
             };
             var accountController = require('../controllers/accountController')(Account);
             accountController.post(req, res);
-            console.log( 'res.status = ' + res.send );
+            console.log('res.status = ' + res.send);
             res.status.calledWith(400).should.equal(true, 'Bad Status');
         });
     });
